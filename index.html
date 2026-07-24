@@ -1,0 +1,160 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="author" content="David Lee Wise / ROOT0 / TriPod LLC / AVAN">
+<title>THE CHLADNI PLATE &middot; PHONOS &middot; UD0</title>
+<style>
+*{box-sizing:border-box}
+:root{--amb:#e8a13a;--amb2:#bd7d18;--phos:#ffb84d;--ink:#2b2415;--dim:#7c6f52;
+  --grn:#3a9e5a;--red:#d06a2a;--panel:rgba(255,252,243,.8);--edge:rgba(232,161,58,.28);--edge2:rgba(232,161,58,.13)}
+html,body{margin:0;height:100%}
+body{background:#faf1d9;color:var(--ink);font:15px/1.55 'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+#bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block}
+.desk{position:relative;z-index:2;max-width:880px;margin:0 auto;padding:26px 18px 60px}
+.dtag{font:600 11px/1 ui-monospace,'Cascadia Code','Segoe UI Mono',monospace;letter-spacing:.28em;text-transform:uppercase;color:var(--amb2)}
+.dtag b{color:var(--amb)}
+h1{margin:.4em 0 .12em;font-size:clamp(25px,4.5vw,41px);font-weight:800;letter-spacing:.01em;color:#241d0f}
+.sub{color:var(--dim);max-width:65ch;margin:.25em 0 0}
+.drag{display:inline-block;margin-left:10px;font:700 10px/1 ui-monospace,monospace;letter-spacing:.14em;color:var(--amb2);border:1px solid var(--amb);border-radius:999px;padding:4px 9px;vertical-align:middle;white-space:nowrap}
+.tier{display:inline-flex;gap:6px;align-items:center;margin-top:14px;font:600 11px/1 ui-monospace,monospace;letter-spacing:.14em}
+.chip{padding:5px 10px;border-radius:999px;border:1px solid var(--edge);background:var(--panel)}
+.chip.lit{color:var(--grn);border-color:rgba(58,158,90,.4)}
+.chip.amb{color:var(--amb2);border-color:rgba(189,125,24,.5)}
+.card{margin-top:20px;background:var(--panel);border:1px solid var(--edge);border-radius:16px;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);box-shadow:0 14px 44px rgba(150,110,20,.14)}
+.stagewrap{padding:14px}
+#stage{width:100%;height:auto;display:block;border-radius:10px;background:radial-gradient(120% 100% at 50% 0%,#241a08,#150f04);border:1px solid rgba(232,161,58,.32);box-shadow:0 0 28px rgba(232,161,58,.14) inset;touch-action:none;cursor:crosshair}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:0 14px 14px}
+.btn{cursor:pointer;border:1px solid var(--edge);background:#fffdf5;color:var(--ink);padding:9px 13px;border-radius:9px;font:600 12.5px 'Segoe UI',system-ui;letter-spacing:.02em;transition:.15s}
+.btn:hover{border-color:var(--amb);box-shadow:0 0 13px rgba(232,161,58,.26)}
+.btn.on{background:linear-gradient(180deg,#f4b755,#bd7d18);border-color:#bd7d18;color:#3a2a08}
+.btn.play{background:linear-gradient(180deg,#ffc766,#e0902a);border-color:#c47f18;color:#3a2a08;font-weight:700}
+.rng{display:flex;align-items:center;gap:8px;font:600 12px ui-monospace,monospace;color:var(--dim);background:#fffdf5;border:1px solid var(--edge);border-radius:9px;padding:6px 12px}
+.rng b{color:var(--amb2);min-width:3em;text-align:right;display:inline-block}
+input[type=range]{accent-color:var(--amb);width:110px}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--edge2);border-top:1px solid var(--edge);border-radius:0 0 16px 16px;overflow:hidden}
+.ro{background:var(--panel);padding:11px 14px}
+.ro .k{font:600 10px ui-monospace,monospace;letter-spacing:.15em;text-transform:uppercase;color:var(--dim)}
+.ro .v{font:700 18px ui-monospace,monospace;margin-top:3px;color:var(--ink)}
+.ro .v.g{color:var(--grn)} .ro .v.r{color:var(--red)} .ro .v.a{color:var(--amb2)}
+.honesty{margin-top:22px;display:grid;gap:10px}
+.hz{background:var(--panel);border:1px solid var(--edge);border-left-width:3px;border-radius:10px;padding:12px 15px}
+.hz.lit{border-left-color:var(--grn)} .hz.amb{border-left-color:var(--amb)}
+.hz h4{margin:0 0 4px;font:700 11px ui-monospace,monospace;letter-spacing:.15em}
+.hz.lit h4{color:var(--grn)} .hz.amb h4{color:var(--amb2)}
+.hz p{margin:0;color:#3c3320;font-size:13.5px}
+.law{margin-top:18px;text-align:center;color:var(--dim);font:italic 500 13px/1.55 Georgia,serif}
+.sig{margin-top:24px;text-align:center;color:var(--dim);font:600 11px ui-monospace,monospace;letter-spacing:.13em}
+.sig b{color:var(--ink)}
+#fail{display:none;position:fixed;left:12px;right:12px;bottom:12px;z-index:99;background:#1a1204;border:1px solid var(--amb);color:#ffe6b8;padding:12px;border-radius:8px;font:12px ui-monospace,monospace;white-space:pre-wrap}
+</style></head><body>
+<canvas id="bg"></canvas>
+<div class="desk">
+  <div class="dtag">&#9835; <b>PHONOS</b> &middot; the physics of sound &middot; on Chladni's bench</div>
+  <h1>THE CHLADNI PLATE <span class="drag">&#9835; PLAY &middot; DRAG &middot; TAP</span></h1>
+  <p class="sub">Bow a metal plate and scatter sand across it: the sand flees the shaking and piles up along the lines that DON'T move &mdash; the nodal lines &mdash; drawing a figure that belongs to that one note. This is Chladni's own experiment, 1787. <b>Pick a mode</b>, <b>tap PLAY</b> to hear the note that makes it, and watch the sand find the still lines.</p>
+  <div class="tier"><span class="chip lit">&#9670; LIT</span><span class="chip amb">&#9650; AMBER</span></div>
+  <div class="card">
+    <div class="stagewrap"><canvas id="stage" width="880" height="380"></canvas></div>
+    <div class="controls"><button class="btn play" id="play">&#9835; PLAY the note</button><label class="rng">mode m <input type="range" id="m" min="1" max="6" value="2" step="1"><b id="mv">2</b></label><label class="rng">mode n <input type="range" id="n" min="1" max="6" value="3" step="1"><b id="nv">3</b></label></div>
+    <div class="readout"><div class="ro"><div class="k">mode (m,n)</div><div class="v" id="roMode">&mdash;</div></div><div class="ro"><div class="k">frequency</div><div class="v" id="roFreq">&mdash;</div></div><div class="ro"><div class="k">nodal cells</div><div class="v" id="roNodes">&mdash;</div></div><div class="ro"><div class="k">the figure</div><div class="v" id="roState">&mdash;</div></div></div>
+  </div>
+  <div class="honesty">
+    <div class="hz lit"><h4>&#9670; LIT &mdash; heard + measured live</h4><p>A vibrating square plate's modes are the standing waves cos(m&pi;x)cos(n&pi;y) &minus; cos(n&pi;x)cos(m&pi;y); the SAND collects exactly where that function is zero (the nodal lines that never move), which the page samples live to draw the figure. The note's pitch rises with the mode as &radic;(m&sup2;+n&sup2;) &mdash; higher modes, finer figures, higher notes &mdash; and PLAY sounds that frequency through Web Audio. The nodal pattern is computed from the real mode shape, not drawn by hand.</p></div>
+    <div class="hz amb"><h4>&#9650; AMBER &mdash; the figure</h4><p>The cos-combination is the ideal free-square-plate model; a real plate needs full Kirchhoff&ndash;Love elasticity (its exact figures depend on material, thickness and clamping), and the frequency here is a &radic;(m&sup2;+n&sup2;) scaling, not a plate's true eigenfrequency. The nodal geometry &mdash; where the figure comes from &mdash; is exact for the model.</p></div>
+  </div>
+  <div class="law">PHONOS: the sand shows you the note. &nbsp;&mdash; <b>CHLADNI</b></div>
+  <div class="sig">David Lee Wise / ROOT0 / TriPod LLC &nbsp;&middot;&nbsp; kept by <b>CHLADNI</b></div>
+</div>
+<div id="fail"></div>
+<script>
+window.onerror=function(m,s,l,c,e){var f=document.getElementById('fail');if(f){f.style.display='block';f.textContent='! '+m+' @'+l+':'+c;}};
+</script>
+<script>
+(function(){
+  var cv=document.getElementById('bg'); if(!cv) return;
+  function fallback(){var c=cv.getContext&&cv.getContext('2d');if(!c)return;
+    function f(){var w=cv.width=innerWidth,h=cv.height=innerHeight;var g=c.createRadialGradient(w*.5,h*.4,0,w*.5,h*.4,Math.max(w,h)*.9);g.addColorStop(0,'#fdf3df');g.addColorStop(1,'#f2e3c2');c.fillStyle=g;c.fillRect(0,0,w,h);}f();addEventListener('resize',f);}
+  var gl;try{gl=cv.getContext('webgl',{antialias:true,alpha:false})||cv.getContext('experimental-webgl');}catch(e){}
+  if(!gl){fallback();return;}
+  var ring=[];for(var i=0;i<120;i++){var a=i/120*6.283,b=(i+1)/120*6.283;ring.push(Math.cos(a),Math.sin(a),Math.cos(b),Math.sin(b));}
+  var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(ring),gl.STATIC_DRAW);
+  var VS='attribute vec2 p;uniform float asp,sc,ox,oy;void main(){vec2 q=p*sc;q.x+=ox;q.y+=oy;q.x/=asp;gl_Position=vec4(q,0.0,1.0);}';
+  var FS='precision mediump float;uniform float a;void main(){gl_FragColor=vec4(0.91,0.63,0.23,a);}';
+  function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw gl.getShaderInfoLog(o);return o;}
+  var prog;try{prog=gl.createProgram();gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(prog);if(!gl.getProgramParameter(prog,gl.LINK_STATUS))throw'link';}catch(e){fallback();return;}
+  var uAsp=gl.getUniformLocation(prog,'asp'),uSc=gl.getUniformLocation(prog,'sc'),uOx=gl.getUniformLocation(prog,'ox'),uOy=gl.getUniformLocation(prog,'oy'),uA=gl.getUniformLocation(prog,'a'),aLoc=gl.getAttribLocation(prog,'p');
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  var SRC=[[-0.5,0.3],[0.55,-0.3],[0.1,0.55]];
+  var t0=null;
+  function frame(tm){requestAnimationFrame(frame);if(t0===null)t0=tm;var tt=(tm-t0)*0.001;
+    var w=cv.width=innerWidth,h=cv.height=innerHeight;gl.viewport(0,0,w,h);
+    gl.clearColor(0.988,0.949,0.874,1.0);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog);
+    gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(aLoc);gl.vertexAttribPointer(aLoc,2,gl.FLOAT,false,0,0);
+    gl.uniform1f(uAsp,w/h);
+    for(var s=0;s<SRC.length;s++)for(var k=0;k<5;k++){var ph=(tt*0.25+k*0.2)%1.0;var r=ph*0.9;
+      gl.uniform1f(uSc,r);gl.uniform1f(uOx,SRC[s][0]);gl.uniform1f(uOy,SRC[s][1]);gl.uniform1f(uA,0.11*(1.0-ph));gl.lineWidth(1);gl.drawArrays(gl.LINES,0,ring.length/2);}
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+<script>
+(function(){
+  var cv=document.getElementById('stage'); var ctx=cv&&cv.getContext('2d'); if(!ctx)return;
+  var DPR=Math.min(window.devicePixelRatio||1,2);
+  function size(){var w=cv.clientWidth||880;cv.width=Math.round(w*DPR);cv.height=Math.round((w*380/880)*DPR);}
+  size(); addEventListener('resize',size);
+  var env={cv:cv,ctx:ctx,DPR:DPR,W:function(){return cv.width/DPR;},H:function(){return cv.height/DPR;},
+    set:function(id,val,cls){var e=document.getElementById(id);if(e){e.textContent=val;if(cls!=null)e.className='v '+cls;}},
+    evt:function(e){var r=cv.getBoundingClientRect();var sx=(cv.width/DPR)/r.width, sy=(cv.height/DPR)/r.height;
+      var cx=(e.touches?e.touches[0].clientX:e.clientX), cy=(e.touches?e.touches[0].clientY:e.clientY);
+      return {x:(cx-r.left)*sx, y:(cy-r.top)*sy};}};
+  var t0=null, inited=false;
+  function loop(t){requestAnimationFrame(loop);if(t0===null)t0=t;env.t=(t-t0)*0.001;
+    if(!inited&&window.__INST__){inited=true;if(window.__INST__.init)window.__INST__.init(env);}
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    if(window.__INST__&&window.__INST__.draw)window.__INST__.draw(env);}
+  requestAnimationFrame(loop);
+})();
+</script>
+<script>
+  function onDrag(env,pick,move){var handle=null;
+    function down(e){e.preventDefault();var p=env.evt(e);handle=pick(p);if(handle!=null)move(handle,p);}
+    function mv(e){if(handle==null)return;e.preventDefault();move(handle,env.evt(e));}
+    function up(){handle=null;}
+    env.cv.addEventListener('pointerdown',down);env.cv.addEventListener('pointermove',mv);
+    window.addEventListener('pointerup',up);env.cv.addEventListener('touchstart',down,{passive:false});env.cv.addEventListener('touchmove',mv,{passive:false});window.addEventListener('touchend',up);
+  }
+  var actx=null;
+  function AC(){try{if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return null;}if(actx&&actx.state==='suspended')actx.resume();return actx;}
+  function tone(freq,t0,dur,gv,type){var a=AC();if(!a)return;var o=a.createOscillator(),g=a.createGain();o.type=type||'sine';o.frequency.value=freq;
+    var t=a.currentTime+t0;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(0.0002,gv),t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+dur+0.03);}
+
+(function(){
+  var m=2,n=3,ENV;
+  function W(x,y){return Math.cos(m*Math.PI*x)*Math.cos(n*Math.PI*y)-Math.cos(n*Math.PI*x)*Math.cos(m*Math.PI*y);}
+  function freq(){return 160*Math.sqrt(m*m+n*n);}
+  function refresh(){if(!ENV)return;ENV.set('roMode','('+m+', '+n+')','a');
+    ENV.set('roFreq',freq().toFixed(0)+' Hz','a');
+    ENV.set('roNodes',(m*n)+' cells','a');
+    ENV.set('roState',m===n?'degenerate (square symmetry)':'a Chladni figure',m===n?'r':'g');}
+  window.__INST__={init:function(env){ENV=env;
+    document.getElementById('play').onclick=function(){tone(freq(),0,1.8,0.18,'sine');};
+    document.getElementById('m').oninput=function(){m=+this.value;document.getElementById('mv').textContent=m;refresh();};
+    document.getElementById('n').oninput=function(){n=+this.value;document.getElementById('nv').textContent=n;refresh();};
+    refresh();},
+   draw:function(env){var c=env.ctx,w=env.W(),h=env.H();c.clearRect(0,0,w,h);
+     var S=Math.min(w*0.62,h*0.9),ox=(w-S)/2,oy=(h-S)/2;
+     // the plate
+     c.fillStyle='#1c1506';c.fillRect(ox,oy,S,S);c.strokeStyle='rgba(232,161,58,.4)';c.lineWidth=1.5;c.strokeRect(ox,oy,S,S);
+     // sand: sample grid, dot where |W|<eps (nodal lines)
+     c.fillStyle='rgba(255,196,90,.9)';var N=150;
+     for(var i=0;i<N;i++)for(var j=0;j<N;j++){var x=i/(N-1),y=j/(N-1);if(Math.abs(W(x,y))<0.05){c.fillRect(ox+x*S-0.7,oy+y*S-0.7,1.4,1.4);}}
+     c.fillStyle='#9a8a5a';c.font='600 11px ui-monospace,monospace';c.textAlign='center';
+     c.fillText("Chladni figure  ("+m+", "+n+")  ·  the sand rests on the still lines",w/2,oy+S+20);
+     // legend antinode note
+     c.textAlign='left';c.fillStyle='#7c6f52';c.font='600 10px ui-monospace,monospace';
+     c.fillText('bright = sand = nodes (no motion)',ox,oy-8);
+   }};
+})();
+</script>
+</body></html>
