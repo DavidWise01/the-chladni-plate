@@ -1,0 +1,9 @@
+ROOT0-DLW-CHAIN-v1
+index : 1558
+slug  : the-chladni-plate
+seal  : a1d63caa9577886e458440cb50ac280b8e4d7a155ddb3a2ce6b51c62d9a4447a
+prev  : 69a5c44c90874c67e851627331b8ebc9223d7f09fbadfe3fc578dfd981542985
+link  : dec686ece94e0c27098b3e14a93b5c9b3b0c8a02dd82308965357b46f7d8f8b5
+head  : 1116c26c6f1abed4f5293f66823198bdf6ae804317951e4e2ef0e5b1693534b3
+
+— the tether: link = sha256(index|slug|seal|prev). the chain head commits to the whole corpus.
